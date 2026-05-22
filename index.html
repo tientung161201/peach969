@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Trắc nghiệm Công nghệ kim loại</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: linear-gradient(145deg, #f0f9ff 0%, #e6f0fa 100%); font-family: 'Inter', sans-serif; padding: 2rem 1.5rem; min-height: 100vh; }
+    .exam-wrapper { max-width: 1280px; margin: 0 auto; }
+    .hero-panel { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); border-radius: 2.5rem; box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0,0,0,0.02); padding: 1.5rem 2rem; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.5); }
+    
+    .title-section { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(226, 232, 240, 0.8); padding-bottom: 1rem; }
+    .badge-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .badge { background: white; border-radius: 100px; padding: 0.5rem 1.2rem; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 8px rgba(0,0,0,0.02); display: inline-flex; align-items: center; gap: 10px; color: #1e293b; }
+    .badge i { color: #3b82f6; }
+
+    .controls-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+    
+    .mode-selector { display: flex; align-items: center; gap: 12px; background: #fff; padding: 8px 18px; border-radius: 50px; width: fit-content; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .mode-label { font-weight: 600; font-size: 0.85rem; color: #64748b; }
+    .mode-label.active { color: #3b82f6; }
+    .switch { position: relative; display: inline-block; width: 46px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f97316; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #3b82f6; }
+    input:checked + .slider:before { transform: translateX(22px); }
+    
+    .btn { border: none; padding: 0.7rem 1.5rem; border-radius: 2rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.05); color: #1e293b; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-warning { background: #f97316; color: white; }
+    .btn-secondary { background: #64748b; color: white; }
+    
+    .bottom-action-bar { display: flex; justify-content: center; margin: 2.5rem 0 1rem 0; }
+    .btn-submit-large { padding: 1rem 3rem; font-size: 1.1rem; border-radius: 2.5rem; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2); }
+
+    .questions-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+    .question-card { background: white; border-radius: 2rem; padding: 1.5rem; transition: all 0.2s; box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.08); border: 1px solid rgba(226, 232, 240, 0.8); }
+    
+    .question-card.correct-highlight { border-left: 8px solid #10b981; background: #f0fdf9; }
+    .question-card.wrong-highlight { border-left: 8px solid #ef4444; background: #fef2f2; }
+    
+    .option-item.is-correct { background: #dcfce7 !important; border: 2.5px solid #10b981 !important; color: #15803d !important; font-weight: 600; }
+    .option-item.is-wrong { background: #fee2e2 !important; border: 2.5px solid #ef4444 !important; color: #b91c1c !important; }
+
+    .q-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 1.2rem; }
+    .q-num { background: #eef2ff; border-radius: 40px; padding: 0.2rem 0.9rem; font-weight: 700; color: #1e40af; font-size: 0.85rem; flex-shrink: 0; }
+    .q-text { font-weight: 700; font-size: 1.1rem; color: #0f172a; line-height: 1.5; }
+    
+    .options-list { display: flex; flex-direction: column; gap: 0.85rem; }
+    .option-item { display: block; background: #f8fafc; padding: 0.9rem 1.4rem; border-radius: 1.2rem; transition: all 0.15s ease; border: 1.5px solid #e2e8f0; cursor: pointer; position: relative; font-size: 1rem; color: #334155; line-height: 1.4; }
+    .option-item input[type="radio"] { display: none; }
+    .option-item:has(input[type="radio"]:checked) { border: 2.5px solid #3b82f6; background-color: #f0f6ff; color: #1d4ed8; font-weight: 500; }
+
+    .answer-key { margin-top: 1rem; font-size: 0.9rem; background: #fef9e3; padding: 0.6rem 1.2rem; border-radius: 1rem; display: none; border: 1px solid #fde68a; color: #854d0e; }
+    
+    footer { text-align: center; margin-top: 3rem; padding-bottom: 2rem; color: #64748b; font-size: 0.85rem; }
+
+    /* ==========================================================================
+       HỆ THỐNG POPUP ĐỒ HỌA MỚI (MODAL & TOAST)
+       ========================================================================== */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .modal-overlay.show { opacity: 1; visibility: visible; }
+    
+    .modal-box { background: white; border-radius: 2.5rem; width: 90%; max-width: 500px; padding: 2.5rem 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); text-align: center; transform: scale(0.85); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .modal-overlay.show .modal-box { transform: scale(1); }
+    
+    .modal-icon { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; }
+    .icon-confirm { background: #fef3c7; color: #d97706; }
+    .icon-success { background: #dcfce7; color: #10b981; }
+    
+    .modal-title { font-size: 1.4rem; font-weight: 800; color: #1e293b; margin-bottom: 0.8rem; }
+    .modal-desc { font-size: 1rem; color: #64748b; line-height: 1.5; margin-bottom: 2rem; }
+    
+    .score-large { font-size: 3.5rem; font-weight: 900; color: #3b82f6; margin-bottom: 0.5rem; }
+    .score-sub { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; }
+    
+    .modal-buttons { display: flex; gap: 1rem; justify-content: center; }
+    .modal-buttons .btn { padding: 0.8rem 2rem; font-size: 0.95rem; }
+
+    /* Toast Notification */
+    .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 3000; display: flex; flex-direction: column; gap: 0.8rem; }
+    .toast-custom { background: #1e293b; color: white; padding: 1rem 1.5rem; border-radius: 1.2rem; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-weight: 500; font-size: 0.9rem; border-left: 5px solid #3b82f6; }
+    .toast-custom.show { transform: translateY(0); opacity: 1; }
+    .toast-custom i { color: #3b82f6; font-size: 1.1rem; }
+
+    @media (max-width: 680px) {
+      body { padding: 1rem; }
+      .hero-panel { padding: 1.2rem; border-radius: 1.5rem; }
+      .q-header { flex-direction: column; }
+      .title-section { flex-direction: column; align-items: flex-start; }
+      .controls-row { flex-direction: column; align-items: stretch; }
+      .mode-selector { width: 100%; justify-content: center; }
+      .btn { width: 100%; justify-content: center; }
+      .toast-container { left: 1rem; right: 1rem; bottom: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="exam-wrapper">
+
+  <div class="hero-panel">
+    <div class="title-section">
+      <div>
+        <h1 id="dynamicTitle" style="font-weight: 800; font-size: 1.7rem; color: #1e293b;">📚 Đang tải...</h1>
+        <p id="modeDescription" style="color: #64748b; margin-top: 6px; font-size: 0.95rem;">Chế độ luyện tập: Hiện đáp án ngay khi chọn.</p>
+      </div>
+      <div class="badge-group">
+        <div class="badge" id="totalQuestionsBadge"><i class="fas fa-layer-group"></i> -- câu</div>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div class="mode-selector">
+        <span class="mode-label active" id="labelPractice">Luyện tập</span>
+        <label class="switch">
+          <input type="checkbox" id="modeToggle">
+          <span class="slider"></span>
+        </label>
+        <span class="mode-label" id="labelExam">Thi thử (20 câu)</span>
+      </div>
+      
+      <div>
+        <button id="newExamBtn" class="btn btn-primary"><i class="fas fa-redo"></i> Làm đề mới</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="questionsContainer" class="questions-grid"></div>
+
+  <div class="bottom-action-bar">
+    <button id="submitBtn" class="btn btn-warning btn-submit-large" style="display: none;"><i class="fas fa-check-double"></i> Nộp bài & chấm điểm</button>
+  </div>
+
+  <footer><i class="fas fa-brain"></i> Hệ thống học tập thông minh</footer>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-overlay" id="customModal">
+  <div class="modal-box" id="modalBox">
+    </div>
+</div>
+
+<script>
+  let originalBank = [];
+  let currentQuestions = [];    
+  let examSubmitted = false;
+  let isExamMode = false;
+
+  const questionsContainer = document.getElementById('questionsContainer');
+  const modeToggle = document.getElementById('modeToggle');
+  const submitBtn = document.getElementById('submitBtn');
+  const modeDescription = document.getElementById('modeDescription');
+  const labelPractice = document.getElementById('labelPractice');
+  const labelExam = document.getElementById('labelExam');
+  const customModal = document.getElementById('customModal');
+  const modalBox = document.getElementById('modalBox');
+  const toastContainer = document.getElementById('toastContainer');
+
+  fetch('questions.json')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('dynamicTitle').innerText = data.app_title || "Trắc nghiệm";
+      originalBank = data.questions || [];
+      initApp(true); // Truyền true để không hiện toast khi mới nạp trang lần đầu
+    });
+
+  function initApp(isFirstLoad = false) {
+    isExamMode = modeToggle.checked;
+    examSubmitted = false;
+    
+    labelPractice.classList.toggle('active', !isExamMode);
+    labelExam.classList.toggle('active', isExamMode);
+    modeDescription.innerText = isExamMode ? "Chế độ thi thử: Ngẫu nhiên 20 câu, trộn đề, xem kết quả sau cùng." : "Chế độ luyện tập: Theo thứ tự, trộn đáp án, hiện kết quả ngay.";
+    
+    submitBtn.style.display = isExamMode ? 'inline-flex' : 'none';
+    
+    if (!isFirstLoad) {
+      showToast(isExamMode ? "Đã chuyển sang chế độ Thi thử (20 câu)" : "Đã chuyển sang chế độ Luyện tập");
+    }
+    
+    generateQuestions();
+  }
+
+  function generateQuestions() {
+    let tempQuestions = [...originalBank];
+
+    if (isExamMode) {
+      shuffleArray(tempQuestions);
+      tempQuestions = tempQuestions.slice(0, 20);
+    }
+
+    currentQuestions = tempQuestions.map((q, idx) => {
+      const options = shuffleArray([...q.options]);
+      return { 
+        ...q, 
+        shuffledOptions: options,
+        userAnswer: null,
+        isAnswered: false
+      };
+    });
+
+    document.getElementById('totalQuestionsBadge').innerHTML = `<i class="fas fa-list"></i> Đang hiển thị: ${currentQuestions.length} câu`;
+    renderQuestions();
+  }
+
+  function renderQuestions() {
+    questionsContainer.innerHTML = currentQuestions.map((q, idx) => `
+      <div class="question-card" id="card-${idx}">
+        <div class="q-header">
+          <span class="q-num">Câu ${idx + 1}</span>
+          <span class="q-text">${q.question}</span>
+        </div>
+        <div class="options-list">
+          ${q.shuffledOptions.map(opt => `
+            <label class="option-item" data-qidx="${idx}" data-val="${opt}">
+              <input type="radio" name="q${idx}" value="${opt}" 
+                ${q.isAnswered ? 'disabled' : ''} 
+                ${q.userAnswer === opt ? 'checked' : ''}>
+              <span>${opt}</span>
+            </label>
+          `).join('')}
+        </div>
+        <div class="answer-key" id="key-${idx}">
+          <i class="fas fa-info-circle"></i> Đáp án đúng: <b>${q.correct_text}</b>
+        </div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.option-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        const qIdx = this.dataset.qidx;
+        const val = this.dataset.val;
+        if (!currentQuestions[qIdx].isAnswered) {
+          selectAnswer(qIdx, val);
+        }
+      });
+    });
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectAnswer(qIdx, val) {
+    const q = currentQuestions[qIdx];
+    q.userAnswer = val;
+
+    if (!isExamMode) {
+      q.isAnswered = true;
+      const card = document.getElementById(`card-${qIdx}`);
+      const items = card.querySelectorAll('.option-item');
+      
+      items.forEach(item => {
+        const itemVal = item.dataset.val;
+        item.querySelector('input').disabled = true;
+
+        if (itemVal === q.correct_text) item.classList.add('is-correct');
+        if (itemVal === val && val !== q.correct_text) item.classList.add('is-wrong');
+      });
+      
+      if (val === q.correct_text) {
+        card.classList.add('correct-highlight');
+      } else {
+        card.classList.add('wrong-highlight');
+        document.getElementById(`key-${qIdx}`).style.display = 'block';
+      }
+    } else {
+      const radio = document.querySelector(`input[name="q${qIdx}"][value="${val}"]`);
+      if(radio) radio.checked = true;
+    }
+  }
+
+  // KHỞI CHẠY TIẾN TRÌNH NỘP BÀI QUA POPUP MODAL ĐỒ HỌA
+  function submitExam() {
+    if (examSubmitted) return;
+    
+    const unanswered = currentQuestions.filter(q => !q.userAnswer).length;
+    
+    // Tạo Popup xác nhận đồ họa thay thế cho hàm confirm()
+    let modalHTML = `
+      <div class="modal-icon icon-confirm"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="modal-title">Xác nhận nộp bài?</div>
+      <div class="modal-desc">
+        ${unanswered > 0 ? `Bạn còn <b style="color:#ef4444">${unanswered} câu chưa hoàn thành</b>.` : 'Bạn đã hoàn thành toàn bộ câu hỏi.'} <br>Hệ thống sẽ khóa bài làm và chấm điểm lập tức!
+      </div>
+      <div class="modal-buttons">
+        <button class="btn btn-secondary" onclick="closeModal()">Làm tiếp</button>
+        <button class="btn btn-warning" onclick="processCalculatedScore()">Nộp luôn</button>
+      </div>
+    `;
+    openModal(modalHTML);
+  }
+
+  // TIẾN HÀNH CHẤM ĐIỂM VÀ LÊN POPUP BÁO ĐIỂM HOÀNH TRÁNG
+  function processCalculatedScore() {
+    closeModal();
+    examSubmitted = true;
+    let score = 0;
+
+    currentQuestions.forEach((q, idx) => {
+      q.isAnswered = true;
+      const card = document.getElementById(`card-${idx}`);
+      const items = card.querySelectorAll('.option-item');
+      const isCorrect = q.userAnswer === q.correct_text;
+      
+      if (isCorrect) score++;
+
+      items.forEach(item => {
+        const itemVal = item.dataset.val;
+        item.querySelector('input').disabled = true;
+
+        if (itemVal === q.correct_text) item.classList.add('is-correct');
+        if (itemVal === q.userAnswer && !isCorrect) item.classList.add('is-wrong');
+      });
+
+      card.classList.add(isCorrect ? 'correct-highlight' : 'wrong-highlight');
+      if (!isCorrect) document.getElementById(`key-${idx}`).style.display = 'block';
+    });
+
+    const finalScore = (score / currentQuestions.length) * 10;
+    
+    // Hiển thị Popup kết quả đồ họa thay thế hoàn toàn cho hàm alert()
+    setTimeout(() => {
+      let resultHTML = `
+        <div class="modal-icon icon-success"><i class="fas fa-trophy"></i></div>
+        <div class="modal-title">Hoàn thành bài thi!</div>
+        <div class="score-large">${finalScore.toFixed(1)}</div>
+        <div class="score-sub">Đạt được: ${score} / ${currentQuestions.length} câu đúng</div>
+        <div class="modal-desc">Hệ thống đã hiển thị chi tiết đáp án đúng/sai của từng câu hỏi ở phía bên dưới.</div>
+        <div class="modal-buttons">
+          <button class="btn btn-primary" onclick="closeModal()">Xem lại đáp án</button>
+        </div>
+      `;
+      openModal(resultHTML);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 400);
+  }
+
+  /* ==========================================================================
+     CÁC HÀM ĐIỀU KHIỂN ENGINE TOAST VÀ MODAL POPUP
+     ========================================================================== */
+  function openModal(contentHTML) {
+    modalBox.innerHTML = contentHTML;
+    customModal.classList.add('show');
+  }
+
+  function closeModal() {
+    customModal.classList.remove('show');
+  }
+
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-custom';
+    toast.innerHTML = `<i class="fas fa-sliders-h"></i> <span>${message}</span>`;
+    toastContainer.appendChild(toast);
+    
+    // Trượt lên mượt mà
+    setTimeout(() => toast.classList.add('show'), 50);
+    
+    // Tự động biến mất sau 3 giây
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 3000);
+  }
+
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  modeToggle.addEventListener('change', () => initApp(false));
+  document.getElementById('newExamBtn').addEventListener('click', () => {
+    initApp(true);
+    showToast("Đã khởi tạo bộ đề thi mới");
+  });
+  submitBtn.addEventListener('click', submitExam);
+</script>
+</body>
+</html>
